@@ -29,8 +29,9 @@ public class CommentService implements ICommentService {
     @Override
     public boolean add(Comment comment) {
         Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
         session.saveOrUpdate(comment);
-        System.out.println("New comment added, if it does not actually added, then add Transaction.");
+        transaction.commit();
         return true;
     }
 
@@ -41,17 +42,34 @@ public class CommentService implements ICommentService {
 
     @Override
     public boolean update(int id, Comment comment) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        Query query = session.createQuery("update Comment set lever=:lever,author=:author,content=:content,likeCount=:likeCount where id=:id");
+        query.setParameter("lever", comment.getLever());
+        query.setParameter("author", comment.getAuthor());
+        query.setParameter("content", comment.getContent());
+        query.setParameter("likeCount", comment.getLikeCount());
+        query.setParameter("id", id);
+        query.executeUpdate();
+        transaction.commit();
         return false;
     }
 
     @Override
     public Comment getById(int id) {
+        Query query = sessionFactory.openSession().createQuery("select c from Comment as c where c.id=:id");
+        query.setParameter("id", id);
+        List result = query.getResultList();
+        if (result.size() > 0) {
+            return (Comment) result.get(0);
+        }
         return null;
     }
 
     @Override
     public List<Comment> getByImageId(int imageId) {
         Query<Comment> query = sessionFactory.openSession().createQuery("select c from Comment as c where c.imageId=:imageId");
+        query.setParameter("imageId", imageId);
         return query.getResultList();
     }
 }

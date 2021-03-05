@@ -10,11 +10,44 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
           integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <style>
+        th, td {
+            border-left: 1px solid green;
+        }
+    </style>
 </head>
 <body>
-<h1>This is page to show image and comment</h1>
-<div class="" th:object="${image}">
-    <img th:src="@{'/i/'+*{src}}" alt="Image" style="width:100px;height:100px;">
+<div class="container">
+    <h1>This is page to show image and comment</h1>
+    <div class="" th:object="${image}">
+        <img th:src="@{'/i/'+*{src}}" alt="Image" style="width:500px;height:500px;">
+    </div>
+    <table>
+        <tr>
+            <th>LEVER</th>
+            <th>AUTHOR</th>
+            <th>CONTENT</th>
+            <th>LIKE COUNT</th>
+            <th>LIKE</th>
+        </tr>
+        <tr th:each="comment:${comments}">
+            <td th:text="${comment.lever}"></td>
+            <td th:text="${comment.author}"></td>
+            <td th:text="${comment.content}"></td>
+            <td th:text="${comment.likeCount}"></td>
+            <td><a th:href="@{'/comment/like/'+${comment.id}}" th:text="Like"></a></td>
+        </tr>
+    </table>
+    <form action="/comment/create" method="post" th:object="${comment}">
+        <input type="hidden" th:value="*{id}" name="id">
+        <input type="hidden" th:value="${image.id}" name="imageId">
+        <select name="lever" id="lever">
+            <option th:each="lever,leverStat:${levers}" th:text="${lever}"></option>
+        </select><br>
+        <input type="text" name="author" th:value="*{author}"><br>
+        <textarea name="content" id="content" cols="30" rows="10" th:value="*{content}"></textarea><br>
+        <input type="submit" value="Post"><br>
+    </form>
 </div>
 </body>
 </html>
