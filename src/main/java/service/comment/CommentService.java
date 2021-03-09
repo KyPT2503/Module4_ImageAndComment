@@ -6,15 +6,18 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 
+@Service
+@Transactional
 public class CommentService implements ICommentService {
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
-    @Autowired
-    private SessionFactory sessionFactory;
 
     @Override
     public List<Comment> getAll() {
@@ -28,10 +31,7 @@ public class CommentService implements ICommentService {
 
     @Override
     public boolean add(Comment comment) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.saveOrUpdate(comment);
-        transaction.commit();
+        entityManager.persist(comment);
         return true;
     }
 
@@ -42,34 +42,17 @@ public class CommentService implements ICommentService {
 
     @Override
     public boolean update(int id, Comment comment) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        Query query = session.createQuery("update Comment set lever=:lever,author=:author,content=:content,likeCount=:likeCount where id=:id");
-        query.setParameter("lever", comment.getLever());
-        query.setParameter("author", comment.getAuthor());
-        query.setParameter("content", comment.getContent());
-        query.setParameter("likeCount", comment.getLikeCount());
-        query.setParameter("id", id);
-        query.executeUpdate();
-        transaction.commit();
-        return false;
+        entityManager.merge(comment);
+        return true;
     }
 
     @Override
     public Comment getById(int id) {
-        Query query = sessionFactory.openSession().createQuery("select c from Comment as c where c.id=:id");
-        query.setParameter("id", id);
-        List result = query.getResultList();
-        if (result.size() > 0) {
-            return (Comment) result.get(0);
-        }
-        return null;
+        return entityManager.find(Comment.class, id);
     }
 
     @Override
     public List<Comment> getByImageId(int imageId) {
-        Query<Comment> query = sessionFactory.openSession().createQuery("select c from Comment as c where c.imageId=:imageId");
-        query.setParameter("imageId", imageId);
-        return query.getResultList();
+        return entityManager.createQuery("select c from Comment as c where c.imageId=?1").setParameter(1, imageId).getResultList();
     }
 }

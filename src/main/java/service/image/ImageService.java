@@ -5,21 +5,23 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.List;
 
+@Service
+@Transactional
 public class ImageService implements IImageService {
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
-    @Autowired
-    private SessionFactory sessionFactory;
 
     @Override
     public List<Image> getAll() {
-        Query query = sessionFactory.openSession().createQuery("select i from Image as i");
-        return query.getResultList();
+        return entityManager.createQuery("select i from Image as i").getResultList();
     }
 
     @Override
@@ -34,13 +36,7 @@ public class ImageService implements IImageService {
 
     @Override
     public int addAndGetId(Image image) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.saveOrUpdate(image);
-        transaction.commit();
-        session.close();
-
-        System.out.println("Saved image, ID of new row(image): " + image.getId());
+        entityManager.persist(image);
         return image.getId();
     }
 
@@ -51,12 +47,6 @@ public class ImageService implements IImageService {
 
     @Override
     public Image getById(int id) {
-        Query query = sessionFactory.openSession().createQuery("select i from Image as i where i.id=:id");
-        query.setParameter("id", id);
-        List result = query.getResultList();
-        if (result.size() > 0) {
-            return (Image) result.get(0);
-        }
-        return null;
+        return entityManager.find(Image.class, id);
     }
 }
