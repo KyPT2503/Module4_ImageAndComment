@@ -1,13 +1,11 @@
 package config;
 
+import aspect.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -39,6 +37,7 @@ import java.util.Properties;
 @ComponentScan("controller")
 @PropertySource("classpath:source.properties")
 @EnableTransactionManagement
+@EnableAspectJAutoProxy
 public class AppConfiguration extends WebMvcConfigurerAdapter implements ApplicationContextAware {
     private ApplicationContext applicationContext;
 
@@ -120,6 +119,7 @@ public class AppConfiguration extends WebMvcConfigurerAdapter implements Applica
         dataSource.setPassword("250399");
         return dataSource;
     }
+
     @Bean
     public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
@@ -136,4 +136,11 @@ public class AppConfiguration extends WebMvcConfigurerAdapter implements Applica
     public ICommentService commentService() {
         return new CommentService();
     }
+
+    @Bean
+    public Logger logger() {
+        return new Logger();
+    }
 }
+
+

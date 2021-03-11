@@ -14,7 +14,11 @@ public class CommentController {
     private ICommentService commentService;
 
     @PostMapping("/create")
-    public ModelAndView create(@ModelAttribute("comment") Comment comment) {
+    public ModelAndView create(@ModelAttribute("comment") Comment comment) throws Exception {
+        String badWord = "fuck";
+        if (comment.getContent().contains(badWord)) {
+            throw new Exception();
+        }
         commentService.add(comment);
         return new ModelAndView("redirect:/image/" + comment.getImageId());
     }
